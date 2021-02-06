@@ -1,0 +1,44 @@
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@rules_haskell//haskell:defs.bzl",
+    "haskell_library",
+    "haskell_binary",
+)
+
+load("//:build/common.bzl", "GHC_FLAGS")
+load("//build/rules/haskell:def.bzl", "paths_module")
+
+haskell_library(
+    name = "homelyapp-library",
+    src_strip_prefix = "src",
+    srcs = glob(['src/**/*.hs']),
+    deps = [
+        "@stackage//:base",
+        "@stackage//:rio",
+        "@stackage//:extensible",
+        "@stackage//:mix",
+    ],
+    compiler_flags = GHC_FLAGS,
+)
+
+paths_module(
+    name = "paths_module",
+    package = "homelyapp",
+    version = "1.0.0",
+)
+
+haskell_binary(
+    name = "homelyapp",
+    srcs = glob(["app/**/*.hs"]),
+    deps = [
+        ":homelyapp-library",
+        ":paths_module",
+        "@stackage//:base",
+        "@stackage//:rio",
+        "@stackage//:extensible",
+        "@stackage//:dotenv",
+        "@stackage//:mix",
+    ],
+    compiler_flags = GHC_FLAGS,
+)
