@@ -1,34 +1,36 @@
 module Main where
 
-import           Paths_homelyapp         (version)
+import           Paths_homelyapp           (version)
 import           RIO
 
-import           Configuration.Dotenv   (defaultConfig, loadFile)
+import           Configuration.Dotenv      (defaultConfig, loadFile)
 import           Data.Extensible
 import           Data.Extensible.GetOpt
-import qualified Data.Version           as Version
-import           GetOpt                 (withGetOpt')
-import           Homely.Cmd
-import           Homely.Env
+import qualified Data.Version              as Version
+import           GetOpt                    (withGetOpt')
+import qualified Homely
 import           Mix
-import           Mix.Plugin.Logger      as MixLogger
+import           Mix.Plugin.Logger         as MixLogger
+import qualified Mix.Plugin.Persist.Sqlite as MixDB
 
 main :: IO ()
-main = withGetOpt' "[options] [input-file]" opts $ \r args usage -> do
+main = withGetOpt' "[options] [config filepath]" opts $ \r args usage -> do
   _ <- tryIO $ loadFile defaultConfig
   if | r ^. #help    -> hPutBuilder stdout (fromString usage)
      | r ^. #version -> hPutBuilder stdout (fromString $ Version.showVersion version <> "\n")
-     | otherwise     -> runCmd r (listToMaybe args)
+     | otherwise     -> runCmd r (fromMaybe "./.homely.yaml" $ listToMaybe args)
   where
     opts = #help    @= helpOpt
         <: #version @= versionOpt
         <: #verbose @= verboseOpt
+        <: #migrate @= migrateOpt
         <: nil
 
 type Options = Record
   '[ "help"    >: Bool
    , "version" >: Bool
    , "verbose" >: Bool
+   , "migrate" >: Bool
    ]
 
 helpOpt :: OptDescr' Bool
@@ -40,11 +42,19 @@ versionOpt = optFlag [] ["version"] "Show version"
 verboseOpt :: OptDescr' Bool
 verboseOpt = optFlag ['v'] ["verbose"] "Enable verbose mode: verbosity level \"debug\""
 
-runCmd :: Options -> Maybe FilePath -> IO ()
-runCmd opts _path = Mix.run plugin cmd
-  where
-    plugin :: Mix.Plugin () IO Env
-    plugin = hsequence
+migrateOpt :: OptDescr' Bool
+migrateOpt = optFlag [] ["migrate"] "Migrate SQLite"
+
+runCmd :: Options -> FilePath -> IO ()
+runCmd opts path = do
+  config <- Homely.readConfig path
+  let plugin = hsequence
         $ #logger <@=> MixLogger.buildPlugin logOpts
+       <: #sqlite <@=> MixDB.buildPlugin (fromString $ config ^. #sqlite_path) 2
        <: nil
+  if opts ^. #migrate then
+    Mix.run plugin Homely.migrate
+  else
+    Mix.run plugin Homely.app
+  where
     logOpts = #handle @= stdout <: #verbose @= (opts ^. #verbose) <: nil

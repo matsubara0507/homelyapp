@@ -35,11 +35,18 @@ stack_snapshot(
     packages = [
         "base",
         "dotenv",
+        "esqueleto",
         "extensible",
         "mix",
+        "mix-plugin-persistent-sqlite",
+        "persistent",
+        "persistent-sqlite",
+        "persistent-template",
         "rio",
         "tasty",
         "tasty-hspec",
+        "th-lift-instances",
+        "yaml",
     ],
     local_snapshot = "//:stack-snapshot.yaml",
 )

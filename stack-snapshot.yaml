@@ -7,3 +7,5 @@ packages:
   commit: 75714be080db16f6a4f9d0a22e86947ffcdadc57
   subdirs:
   - mix
+  - mix-plugin-persistent-sqlite
+  - helper/rio-logger-ext

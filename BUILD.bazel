@@ -21,9 +21,16 @@ haskell_library(
     srcs = glob(["src/**/*.hs"]),
     deps = [
         "@stackage//:base",
+        "@stackage//:esqueleto",
         "@stackage//:extensible",
         "@stackage//:mix",
+        "@stackage//:mix-plugin-persistent-sqlite",
+        "@stackage//:persistent",
+        "@stackage//:persistent-sqlite",
+        "@stackage//:persistent-template",
         "@stackage//:rio",
+        "@stackage//:th-lift-instances",
+        "@stackage//:yaml",
     ],
     compiler_flags = GHC_FLAGS,
 )
@@ -45,6 +52,7 @@ haskell_binary(
         "@stackage//:extensible",
         "@stackage//:dotenv",
         "@stackage//:mix",
+        "@stackage//:mix-plugin-persistent-sqlite",
     ],
     compiler_flags = GHC_FLAGS,
 )

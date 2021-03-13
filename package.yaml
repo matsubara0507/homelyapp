@@ -44,8 +44,15 @@ default-extensions:
 dependencies:
 - base >= 4.7 && < 5
 - rio >= 0.1.1.0
+- esqueleto
 - extensible >= 0.6
 - mix
+- mix-plugin-persistent-sqlite
+- persistent
+- persistent-template
+- persistent-sqlite
+- th-lift-instances
+- yaml
 
 library:
   source-dirs: src
