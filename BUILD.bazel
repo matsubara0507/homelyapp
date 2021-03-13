@@ -6,18 +6,24 @@ load(
     "haskell_binary",
 )
 
-load("//:build/common.bzl", "GHC_FLAGS")
-load("//build/rules/haskell:def.bzl", "paths_module")
+load(
+    "//:build/common.bzl",
+    "GHC_FLAGS",
+)
+load(
+    "//build/rules/haskell:def.bzl",
+    "paths_module",
+)
 
 haskell_library(
     name = "homelyapp-library",
     src_strip_prefix = "src",
-    srcs = glob(['src/**/*.hs']),
+    srcs = glob(["src/**/*.hs"]),
     deps = [
         "@stackage//:base",
-        "@stackage//:rio",
         "@stackage//:extensible",
         "@stackage//:mix",
+        "@stackage//:rio",
     ],
     compiler_flags = GHC_FLAGS,
 )

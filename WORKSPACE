@@ -2,7 +2,7 @@ workspace(name = "homelyapp")
 
 load(
     "@bazel_tools//tools/build_defs/repo:http.bzl",
-    "http_archive"
+    "http_archive",
 )
 
 http_archive(
@@ -27,17 +27,19 @@ rules_haskell_dependencies()
 
 load(
     "@rules_haskell//haskell:cabal.bzl",
-    "stack_snapshot"
+    "stack_snapshot",
 )
 
 stack_snapshot(
     name = "stackage",
     packages = [
         "base",
-        "rio",
         "dotenv",
         "extensible",
         "mix",
+        "rio",
+        "tasty",
+        "tasty-hspec",
     ],
     local_snapshot = "//:stack-snapshot.yaml",
 )

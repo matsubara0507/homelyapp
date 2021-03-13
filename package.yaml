@@ -56,7 +56,6 @@ executables:
     source-dirs: app
     dependencies:
     - homelyapp
-    - githash
     - dotenv
 
 tests:
