@@ -4,6 +4,7 @@ load(
     "@rules_haskell//haskell:defs.bzl",
     "haskell_library",
     "haskell_binary",
+    "haskell_test",
 )
 
 load(
@@ -53,6 +54,22 @@ haskell_binary(
         "@stackage//:dotenv",
         "@stackage//:mix",
         "@stackage//:mix-plugin-persistent-sqlite",
+    ],
+    compiler_flags = GHC_FLAGS,
+)
+
+haskell_test(
+    name = "spec",
+    srcs = glob(["test/**/*.hs"]),
+    deps = [
+        ":homelyapp-library",
+        "@stackage//:base",
+        "@stackage//:rio",
+        "@stackage//:extensible",
+        "@stackage//:mix",
+        "@stackage//:mix-plugin-persistent-sqlite",
+        "@stackage//:tasty",
+        "@stackage//:tasty-hspec",
     ],
     compiler_flags = GHC_FLAGS,
 )
