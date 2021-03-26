@@ -40,6 +40,19 @@ packages:
     url: https://github.com/matsubara0507/mix.hs/archive/75714be080db16f6a4f9d0a22e86947ffcdadc57.tar.gz
 - completed:
     size: 11913
+    subdir: mix-json-logger
+    url: https://github.com/matsubara0507/mix.hs/archive/75714be080db16f6a4f9d0a22e86947ffcdadc57.tar.gz
+    name: mix-json-logger
+    version: 0.1.0
+    sha256: c4aa501c544ab35a214e7b07f2f97fb19de644f48874c8d6838809bcf4d8edb9
+    pantry-tree:
+      size: 334
+      sha256: 372be4778ce622e4ed87a5c77b4aa547a12da67c01570f2927f7a82ad9ec509d
+  original:
+    subdir: mix-json-logger
+    url: https://github.com/matsubara0507/mix.hs/archive/75714be080db16f6a4f9d0a22e86947ffcdadc57.tar.gz
+- completed:
+    size: 11913
     subdir: mix-plugin-persistent-sqlite
     url: https://github.com/matsubara0507/mix.hs/archive/75714be080db16f6a4f9d0a22e86947ffcdadc57.tar.gz
     name: mix-plugin-persistent-sqlite

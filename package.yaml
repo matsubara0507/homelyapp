@@ -47,12 +47,15 @@ dependencies:
 - esqueleto
 - extensible >= 0.6
 - mix
+- mix-json-logger
 - mix-plugin-persistent-sqlite
 - persistent
 - persistent-template
 - persistent-sqlite
+- servant-server
 - th-lift-instances
 - yaml
+- warp
 
 library:
   source-dirs: src

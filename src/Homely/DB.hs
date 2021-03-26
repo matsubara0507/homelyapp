@@ -14,6 +14,7 @@ module Homely.DB
   , findExpenseById
   , findLabelById
   , selectExpensesByMonth
+  , selectLabelAll
   , deleteExpenseById
   , deleteLabelById
   ) where
@@ -115,6 +116,12 @@ selectExpensesByMonth (y, m) =
     startDay  = fromGregorian y m 1
     startDate = UTCTime startDay 0
     endDate   = addUTCTime (-1) $ UTCTime (addGregorianMonthsClip 1 startDay) 0
+
+selectLabelAll :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => m (Map Int64 Label)
+selectLabelAll = MixDB.run $ do
+  ls <- select $ from $ Table @LabelData
+  pure (Map.fromList $ fmap (\l -> (fromSqlKey $ entityKey l, toLabel $ entityVal l)) ls)
+
 
 fromExpenseDataWith :: Map Int64 (Map Int64 Label) -> Entity ExpenseData -> (Int64, Expense)
 fromExpenseDataWith labelMap e =
