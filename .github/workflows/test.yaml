@@ -28,8 +28,8 @@ jobs:
     - name: Build application
       run: |
         bazelisk build //:homelyapp
-        bazel-bin/mdium --version
-        bazel-bin/mdium --help
+        bazel-bin/homelyapp --version
+        bazel-bin/homelyapp --help
 
     - name: Run test
       run: bazelisk test //...
