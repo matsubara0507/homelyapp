@@ -1,1 +1,2 @@
 sqlite_path: ./homely.sqlite
+static_path: ./../static

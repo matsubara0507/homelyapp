@@ -26,6 +26,13 @@ packages:
   original:
     hackage: incremental-0.3.1
 - completed:
+    hackage: servant-elm-0.7.2@sha256:27e45a456ad56ba59502549a59ce66f7229a17bbce72c413cbf8615ed074d754,4579
+    pantry-tree:
+      size: 2081
+      sha256: 4b10f1da950fea1a0bcaf74a9e68dc0a1c0136e8c09a136b9c3f6c89e09ad21a
+  original:
+    hackage: servant-elm-0.7.2
+- completed:
     size: 11913
     subdir: mix
     url: https://github.com/matsubara0507/mix.hs/archive/75714be080db16f6a4f9d0a22e86947ffcdadc57.tar.gz
@@ -77,6 +84,45 @@ packages:
   original:
     subdir: helper/rio-logger-ext
     url: https://github.com/matsubara0507/mix.hs/archive/75714be080db16f6a4f9d0a22e86947ffcdadc57.tar.gz
+- completed:
+    size: 19650
+    subdir: elmap
+    url: https://github.com/matsubara0507/elmap.hs/archive/9c9479d3ead6032a0309b5f80f42e94df85da375.tar.gz
+    name: elmap
+    version: 0.1.0.0
+    sha256: 2007d3eaf2df739e27533469921a6bc4ece0fc5d7efdc88ff3afa354a44fbafa
+    pantry-tree:
+      size: 476
+      sha256: a59c6ff50ae3f2cecdf16e12fe38f75e00e266a9ded559ef8ca876d05d764abe
+  original:
+    subdir: elmap
+    url: https://github.com/matsubara0507/elmap.hs/archive/9c9479d3ead6032a0309b5f80f42e94df85da375.tar.gz
+- completed:
+    size: 19650
+    subdir: servant-elmap
+    url: https://github.com/matsubara0507/elmap.hs/archive/9c9479d3ead6032a0309b5f80f42e94df85da375.tar.gz
+    name: servant-elmap
+    version: 0.1.0.0
+    sha256: 2007d3eaf2df739e27533469921a6bc4ece0fc5d7efdc88ff3afa354a44fbafa
+    pantry-tree:
+      size: 614
+      sha256: d423d9bcb549db5c1dfa93276c57bab26f85db79a77da97cea17c1ae97ea78ef
+  original:
+    subdir: servant-elmap
+    url: https://github.com/matsubara0507/elmap.hs/archive/9c9479d3ead6032a0309b5f80f42e94df85da375.tar.gz
+- completed:
+    size: 19650
+    subdir: extensible-elmap
+    url: https://github.com/matsubara0507/elmap.hs/archive/9c9479d3ead6032a0309b5f80f42e94df85da375.tar.gz
+    name: extensible-elmap
+    version: 0.1.0.0
+    sha256: 2007d3eaf2df739e27533469921a6bc4ece0fc5d7efdc88ff3afa354a44fbafa
+    pantry-tree:
+      size: 439
+      sha256: 545989814406ca47317920086e82cf54299eff0543516ed854eb99ed0cadf4d4
+  original:
+    subdir: extensible-elmap
+    url: https://github.com/matsubara0507/elmap.hs/archive/9c9479d3ead6032a0309b5f80f42e94df85da375.tar.gz
 snapshots:
 - completed:
     size: 565715

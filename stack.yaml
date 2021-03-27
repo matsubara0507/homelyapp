@@ -5,6 +5,7 @@ extra-deps:
 - membership-0
 - extensible-0.8.1
 - incremental-0.3.1
+- servant-elm-0.7.2
 - github: matsubara0507/mix.hs
   commit: 75714be080db16f6a4f9d0a22e86947ffcdadc57
   subdirs:
@@ -12,6 +13,12 @@ extra-deps:
   - mix-json-logger
   - mix-plugin-persistent-sqlite
   - helper/rio-logger-ext
+- github: matsubara0507/elmap.hs
+  commit: 9c9479d3ead6032a0309b5f80f42e94df85da375
+  subdirs:
+  - elmap
+  - servant-elmap
+  - extensible-elmap
 
 docker:
   repo: matsubara0507/stack-build
