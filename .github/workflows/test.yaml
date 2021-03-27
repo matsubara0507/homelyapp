@@ -1,0 +1,35 @@
+name: Test Application
+
+on:
+  pull_request: null
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ghc: ["8.10.4"]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache Bazel
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/bazel
+        key: ${{ runner.os }}-${{ hashFiles('WORKSPACE') }}
+
+    - name: Build application
+      run: |
+        bazelisk build //:homelyapp
+        bazel-bin/mdium --version
+        bazel-bin/mdium --help
+
+    - name: Run test
+      run: bazelisk test //...
