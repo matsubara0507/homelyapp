@@ -1,4 +1,4 @@
-resolver: lts-17.1
+resolver: lts-17.7
 packages:
 - membership-0
 - extensible-0.8.1
