@@ -33,3 +33,7 @@ jobs:
 
     - name: Run test
       run: bazelisk test //...
+
+
+    - name: Run Elm test
+      run: npx elm-test elm-test

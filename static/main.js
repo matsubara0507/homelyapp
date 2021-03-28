@@ -7063,7 +7063,7 @@ var $elm$time$Time$toYear = F2(
 		return $elm$time$Time$toCivil(
 			A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
 	});
-var $author$project$Main$syncYearMonth = F2(
+var $author$project$Model$Date$syncYearMonth = F2(
 	function (t, model) {
 		var month = function () {
 			var _v0 = A2($elm$time$Time$toMonth, model.zone, t);
@@ -7201,7 +7201,7 @@ var $author$project$Main$update = F2(
 			case 'Now':
 				var t = message.a;
 				return $author$project$Main$fetchExpenses(
-					A2($author$project$Main$syncYearMonth, t, model));
+					A2($author$project$Model$Date$syncYearMonth, t, model));
 			case 'Input':
 				switch (message.a.$) {
 					case 'ExpenseAmount':
@@ -7527,17 +7527,17 @@ var $elm$html$Html$Attributes$href = function (url) {
 		_VirtualDom_noJavaScriptUri(url));
 };
 var $elm$html$Html$i = _VirtualDom_node('i');
-var $author$project$Main$lastMonth = function (model) {
+var $author$project$Model$Date$lastMonth = function (model) {
 	return (model.month === 1) ? _Utils_Tuple2(model.year - 1, 12) : _Utils_Tuple2(model.year, model.month - 1);
 };
-var $author$project$Main$nextMonth = function (model) {
+var $author$project$Model$Date$nextMonth = function (model) {
 	return (model.month === 12) ? _Utils_Tuple2(model.year + 1, 1) : _Utils_Tuple2(model.year, model.month + 1);
 };
 var $author$project$Main$viewHeader = function (model) {
-	var _v0 = $author$project$Main$nextMonth(model);
+	var _v0 = $author$project$Model$Date$nextMonth(model);
 	var ny = _v0.a;
 	var nm = _v0.b;
-	var _v1 = $author$project$Main$lastMonth(model);
+	var _v1 = $author$project$Model$Date$lastMonth(model);
 	var ly = _v1.a;
 	var lm = _v1.b;
 	return A2(

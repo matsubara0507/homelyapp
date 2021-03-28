@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (checked, class, href, id, placeholder, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
+import Model.Date as Model
 import String.Extra as String
 import Task
 import Time exposing (Month(..), Posix)
@@ -36,24 +37,6 @@ type alias Model =
     , inputDay : String
     , inputDescription : String
     }
-
-
-lastMonth : Model -> ( Int, Int )
-lastMonth model =
-    if model.month == 1 then
-        ( model.year - 1, 12 )
-
-    else
-        ( model.year, model.month - 1 )
-
-
-nextMonth : Model -> ( Int, Int )
-nextMonth model =
-    if model.month == 12 then
-        ( model.year + 1, 1 )
-
-    else
-        ( model.year, model.month + 1 )
 
 
 type Msg
@@ -117,50 +100,6 @@ fetchNow =
     Cmd.batch [ Task.perform HereZone Time.here, Task.perform Now Time.now ]
 
 
-syncYearMonth : Posix -> Model -> Model
-syncYearMonth t model =
-    let
-        month =
-            case Time.toMonth model.zone t of
-                Jan ->
-                    1
-
-                Feb ->
-                    2
-
-                Mar ->
-                    3
-
-                Apr ->
-                    4
-
-                May ->
-                    5
-
-                Jun ->
-                    6
-
-                Jul ->
-                    7
-
-                Aug ->
-                    8
-
-                Sep ->
-                    9
-
-                Oct ->
-                    10
-
-                Nov ->
-                    11
-
-                Dec ->
-                    12
-    in
-    { model | year = Time.toYear model.zone t, month = month }
-
-
 createExpense : Model -> ( Model, Cmd Msg )
 createExpense model =
     case ( String.toInt model.inputAmount, String.toInt model.inputDay ) of
@@ -218,7 +157,7 @@ update message model =
             ( { model | zone = zone }, Cmd.none )
 
         Now t ->
-            fetchExpenses (syncYearMonth t model)
+            fetchExpenses (Model.syncYearMonth t model)
 
         Input ExpenseAmount s ->
             ( { model | inputAmount = s }, Cmd.none )
@@ -252,10 +191,10 @@ viewHeader : Model -> Html Msg
 viewHeader model =
     let
         ( ly, lm ) =
-            lastMonth model
+            Model.lastMonth model
 
         ( ny, nm ) =
-            nextMonth model
+            Model.nextMonth model
     in
     section [ class "hero is-primary" ]
         [ div [ class "hero-body" ]
