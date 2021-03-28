@@ -9,6 +9,7 @@ import Html.Attributes exposing (checked, class, href, id, placeholder, style, t
 import Html.Events exposing (onClick, onInput)
 import Http
 import Model.Date as Model
+import Set
 import String.Extra as String
 import Task
 import Time exposing (Month(..), Posix)
@@ -120,7 +121,7 @@ createExpense model =
                                 |> String.right 2
                             ]
                     , description = model.inputDescription
-                    , labels = Dict.empty
+                    , labels = Set.empty
                     }
             in
             ( model, API.postApiExpenses expense (CreateExpense expense) )

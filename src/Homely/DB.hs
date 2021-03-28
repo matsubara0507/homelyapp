@@ -22,13 +22,15 @@ module Homely.DB
 
 import           RIO
 import qualified RIO.Map                         as Map
+import qualified RIO.Set                         as Set
 import           RIO.Time
 
 import           Data.Extensible                 hiding (fromRecord)
 import           Database.Esqueleto.Experimental hiding (set, (^.))
 import qualified Database.Esqueleto.Experimental as DB
 import           Database.Persist.TH
-import           Homely.Data.Expense             (Expense, Label)
+import           Homely.Data.Expense             (Expense, ExpenseId, Label,
+                                                  LabelId)
 import qualified Mix.Plugin.Persist.Sqlite       as MixDB
 
 share [mkPersist sqlSettings, mkDeleteCascade sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
@@ -51,10 +53,10 @@ ExpenseLabelRel
   deriving Show
 |]
 
-insertExpense :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Expense -> m Int64
+insertExpense :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Expense -> m ExpenseId
 insertExpense expense = MixDB.run $ do
   expenseId <- insert expenseData
-  insertMany_ $ ExpenseLabelRel expenseId . toSqlKey <$> Map.keys (expense ^. #labels)
+  insertMany_ $ ExpenseLabelRel expenseId . toSqlKey <$> Set.toList (expense ^. #labels)
   pure $ fromSqlKey expenseId
   where
     expenseData = ExpenseData
@@ -65,10 +67,10 @@ insertExpense expense = MixDB.run $ do
       zeroTime
     zeroTime = UTCTime (ModifiedJulianDay 0) 0
 
-insertLabel :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Label -> m Int64
+insertLabel :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Label -> m LabelId
 insertLabel label = MixDB.run $ fromSqlKey <$> insert (LabelData (label ^. #name) (label ^. #description))
 
-findExpenseById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Int64 -> m (Maybe Expense)
+findExpenseById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => ExpenseId -> m (Maybe Expense)
 findExpenseById idx = MixDB.run $ do
   es <- select $ do
     e <- from $ Table @ExpenseData
@@ -78,15 +80,13 @@ findExpenseById idx = MixDB.run $ do
   case listToMaybe es of
     Nothing -> pure Nothing
     Just e  -> do
-      ls <- select $ do
-        (el :& l) <-
-          from $ Table @ExpenseLabelRel
-            `InnerJoin` Table @LabelData `DB.on` (\(el :& l) -> el DB.^. ExpenseLabelRelLabelId ==. l DB.^. LabelDataId)
+      lids <- select $ do
+        el <- from $ Table @ExpenseLabelRel
         where_ ((el DB.^. ExpenseLabelRelExpenseId) ==. val (entityKey e))
-        pure (el DB.^. ExpenseLabelRelExpenseId, l)
-      pure $ Just (snd $ fromExpenseDataWith (toLabelMap ls) e)
+        pure (el DB.^. ExpenseLabelRelLabelId)
+      pure $ Just (snd $ fromExpenseDataWith (Map.singleton idx $ Set.fromList $ fromSqlKey . unValue <$> lids) e)
 
-findLabelById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Int64 -> m (Maybe Label)
+findLabelById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => LabelId -> m (Maybe Label)
 findLabelById idx = MixDB.run $ do
   ls <- select $ do
     l <- from $ Table @LabelData
@@ -97,7 +97,7 @@ findLabelById idx = MixDB.run $ do
 
 selectExpensesByMonth
   :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m)
-  => (Integer, Int) -> m (Map Int64 Expense)
+  => (Integer, Int) -> m (Map ExpenseId Expense)
 selectExpensesByMonth (y, m) =
   MixDB.run $ do
     es <- select $ do
@@ -105,33 +105,30 @@ selectExpensesByMonth (y, m) =
       where_ (between (e DB.^. ExpenseDataDate) (val startDate, val endDate))
       pure e
     let eIds = fmap entityKey es
-    ls <- select $ do
-      (el :& l) <-
-        from $ Table @ExpenseLabelRel
-          `InnerJoin` Table @LabelData `DB.on` (\(el :& l) -> el DB.^. ExpenseLabelRelLabelId ==. l DB.^. LabelDataId)
+    els <- select $ do
+      el <- from $ Table @ExpenseLabelRel
       where_ ((el DB.^. ExpenseLabelRelExpenseId) `in_` valList eIds) -- ToDo: eIds size is max 1000
-      pure (el DB.^. ExpenseLabelRelExpenseId, l)
-    pure $ Map.fromList (fromExpenseDataWith (toLabelMap ls) <$> es)
+      pure el
+    pure $ Map.fromList (fromExpenseDataWith (toLabelIdsMap $ fmap entityVal els) <$> es)
   where
     startDay  = fromGregorian y m 1
     startDate = UTCTime startDay 0
     endDate   = addUTCTime (-1) $ UTCTime (addGregorianMonthsClip 1 startDay) 0
 
-selectLabelAll :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => m (Map Int64 Label)
+selectLabelAll :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => m (Map LabelId Label)
 selectLabelAll = MixDB.run $ do
   ls <- select $ from $ Table @LabelData
   pure (Map.fromList $ fmap (\l -> (fromSqlKey $ entityKey l, toLabel $ entityVal l)) ls)
 
-
-fromExpenseDataWith :: Map Int64 (Map Int64 Label) -> Entity ExpenseData -> (Int64, Expense)
+fromExpenseDataWith :: Map ExpenseId (Set LabelId) -> Entity ExpenseData -> (ExpenseId, Expense)
 fromExpenseDataWith labelMap e =
   ( fromSqlKey $ entityKey e
   , toEpense (entityVal e) $ fromMaybe mempty (Map.lookup (fromSqlKey $ entityKey e) labelMap)
   )
 
-toEpense :: ExpenseData -> Map Int64 Label -> Expense
+toEpense :: ExpenseData -> Set LabelId -> Expense
 toEpense (ExpenseData amount date description _ _) ls
-    = #amount      @= amount
+     = #amount      @= amount
     <: #date        @= utctDay date
     <: #description @= description
     <: #labels      @= ls
@@ -148,7 +145,10 @@ toLabelMap = Map.fromListWith Map.union . fmap (\(k, l) -> (fromSqlKey $ unValue
   where
     toSingleton l = Map.singleton (fromSqlKey $ entityKey l) (toLabel $ entityVal l)
 
-deleteExpenseById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Int64 -> m ()
+toLabelIdsMap :: [ExpenseLabelRel] -> Map ExpenseId (Set LabelId)
+toLabelIdsMap = Map.fromListWith (<>) . fmap (\(ExpenseLabelRel eid lid) -> (fromSqlKey eid, Set.singleton $ fromSqlKey lid))
+
+deleteExpenseById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => ExpenseId  -> m ()
 deleteExpenseById idx = MixDB.run $ do
   e <- select $ do
     e <- from $ Table @ExpenseData
@@ -157,7 +157,7 @@ deleteExpenseById idx = MixDB.run $ do
     pure e
   forM_ e $ deleteCascade . entityKey
 
-deleteLabelById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => Int64 -> m ()
+deleteLabelById :: (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader env m, MonadUnliftIO m) => LabelId -> m ()
 deleteLabelById idx = MixDB.run $
   delete $ do
     l <- from $ Table @LabelData

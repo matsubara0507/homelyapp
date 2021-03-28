@@ -4,6 +4,7 @@ import           RIO
 import           RIO.Directory
 import           RIO.FilePath
 import qualified RIO.Map                   as Map
+import qualified RIO.Set                   as Set
 import qualified RIO.Text                  as Text
 import           RIO.Time
 
@@ -65,20 +66,18 @@ tests = withMigrateOn dbPath $
                   <: #description @= "test"
                   <: #labels      @= mempty
                   <: nil
+        labelIds <- runIO $ runWithDB $ Set.fromList <$> mapM insertLabel [label1, label2]
         actual <- runIO $ runWithDB $ do
-          labels <- forM [label1, label2] $ \label -> do
-            idx <- insertLabel label
-            pure (idx, label)
-          idx <- insertExpense (expect & #labels `set` Map.fromList labels)
+          idx <- insertExpense (expect & #labels `set` labelIds)
           e <- findExpenseById idx
           deleteExpenseById idx
-          forM_ (fst <$> labels) deleteLabelById
+          mapM_ deleteLabelById $ Set.toList labelIds
           pure e
         it "insert Expense" $ do
-          fmap (view #amount) actual             `shouldBe` Just (expect ^. #amount)
-          fmap (view #date) actual               `shouldBe` Just (expect ^. #date)
-          fmap (view #description) actual        `shouldBe` Just (expect ^. #description)
-          fmap (Map.elems . view #labels) actual `shouldBe` Just [label1, label2]
+          fmap (view #amount) actual      `shouldBe` Just (expect ^. #amount)
+          fmap (view #date) actual        `shouldBe` Just (expect ^. #date)
+          fmap (view #description) actual `shouldBe` Just (expect ^. #description)
+          fmap (view #labels) actual      `shouldBe` Just labelIds
     describe "selectExpensesByMonth" $ do
       context "witout label" $ do
         let expect1 = #amount      @= 1000
@@ -103,19 +102,16 @@ tests = withMigrateOn dbPath $
       context "with label" $ do
         let label1 = #name @= "hoge" <: #description @= "hogege" <: nil
             label2 = #name @= "fuga" <: #description @= "fugaga" <: nil
-        labels <- runIO $ runWithDB $
-          forM [label1, label2] $ \label -> do
-            idx <- insertLabel label
-            pure (idx, label)
+        labelIds <- runIO $ runWithDB $ Set.fromList <$> mapM insertLabel [label1, label2]
         let expect1 = #amount      @= 1000
                    <: #date        @= fromGregorian 2021 3 21
                    <: #description @= "test"
-                   <: #labels      @= Map.fromList labels
+                   <: #labels      @= labelIds
                    <: nil
             expect2 = #amount      @= 3000
                    <: #date        @= fromGregorian 2021 3 22
                    <: #description @= "test"
-                   <: #labels      @= Map.fromList (take 1 labels)
+                   <: #labels      @= Set.take 1 labelIds
                    <: nil
         actual <- runIO $ runWithDB $ do
           idx1 <- insertExpense expect1
@@ -123,7 +119,7 @@ tests = withMigrateOn dbPath $
           es <- selectExpensesByMonth (2021, 3)
           deleteExpenseById idx1
           deleteExpenseById idx2
-          forM_ (fst <$> labels) deleteLabelById
+          mapM_ deleteLabelById $ Set.toList labelIds
           pure es
         it "insert Expense" $
           Map.elems actual `shouldBe` [expect1, expect2]

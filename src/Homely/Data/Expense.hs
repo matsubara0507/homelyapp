@@ -13,11 +13,13 @@ import           Data.Extensible.Elm.Mapping
 import           Elm.Mapping
 import           Orphans                     ()
 
+type ExpenseId = Int64
+
 type Expense = Record
   '[ "amount"      >: Int -- 円
    , "date"        >: Day
    , "description" >: Text
-   , "labels"      >: Map Int64 Label
+   , "labels"      >: Set LabelId
    ]
 
 instance IsElmType Expense where
@@ -25,6 +27,8 @@ instance IsElmType Expense where
 
 instance IsElmDefinition Expense where
   compileElmDef = ETypeAlias . compileElmRecordAliasWith "Expense"
+
+type LabelId = Int64
 
 type Label = Record
   '[ "name"        >: Text

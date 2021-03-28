@@ -7,7 +7,7 @@ import Http
 import Json.Decode
 import Json.Encode exposing (Value)
 import Json.Helpers exposing (..)
-import Set
+import Set exposing (Set)
 import String
 import Url.Builder
 
@@ -16,7 +16,7 @@ type alias Expense =
     { amount : Int
     , date : String
     , description : String
-    , labels : Dict Int Label
+    , labels : Set Int
     }
 
 
@@ -26,7 +26,7 @@ jsonDecExpense =
         |> required "amount" Json.Decode.int
         |> required "date" Json.Decode.string
         |> required "description" Json.Decode.string
-        |> required "labels" (decodeMap Json.Decode.int jsonDecLabel)
+        |> required "labels" (decodeSet Json.Decode.int)
 
 
 jsonEncExpense : Expense -> Value
@@ -35,7 +35,7 @@ jsonEncExpense val =
         [ ( "amount", Json.Encode.int val.amount )
         , ( "date", Json.Encode.string val.date )
         , ( "description", Json.Encode.string val.description )
-        , ( "labels", encodeMap Json.Encode.int jsonEncLabel val.labels )
+        , ( "labels", encodeSet Json.Encode.int val.labels )
         ]
 
 
