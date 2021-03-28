@@ -52,7 +52,7 @@ paths_module(
 
 haskell_binary(
     name = "homelyapp",
-    srcs = glob(["app/**/*.hs"]),
+    srcs = glob(["app/server/**/*.hs"]),
     deps = [
         ":homelyapp-library",
         ":paths_module",
@@ -65,6 +65,23 @@ haskell_binary(
     ],
     compiler_flags = GHC_FLAGS,
 )
+
+haskell_binary(
+    name = "generateElm",
+    srcs = glob(["app/generate/**/*.hs"]),
+    deps = [
+        ":homelyapp-library",
+        ":paths_module",
+        "@stackage//:base",
+        "@stackage//:rio",
+        "@stackage//:extensible",
+        "@stackage//:dotenv",
+        "@stackage//:mix",
+        "@stackage//:mix-plugin-persistent-sqlite",
+    ],
+    compiler_flags = GHC_FLAGS,
+)
+
 
 haskell_test(
     name = "spec",
