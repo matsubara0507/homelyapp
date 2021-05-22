@@ -78,7 +78,7 @@ indexHtml = do
       H.title $ H.text "Homely App"
     H.div ! H.class_ "Box text-center mt-3 container-sm" $ do
       H.div ! H.class_ "Box-header" $
-        H.h1 ! H.class_ "Box-title" $ H.text "AnaQRam Web"
+        H.h1 ! H.class_ "Box-title" $ H.text "Homely App"
       H.div ! H.class_ "Box-Body" ! H.id "main" $ H.text ""
     forM_ ["static/main.js", "static/index.js"] $ \url ->
       H.script ! H.src url $ H.text ""
