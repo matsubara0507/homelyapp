@@ -34,7 +34,7 @@ import           Homely.Data.Expense             (Expense, ExpenseId, Label,
                                                   LabelId)
 import qualified Mix.Plugin.Persist.Sqlite       as MixDB
 
-share [mkPersist sqlSettings, mkDeleteCascade sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
+share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 ExpenseData
   amount Int
   date UTCTime
@@ -49,8 +49,8 @@ LabelData
   deriving Show
 
 ExpenseLabelRel
-  expenseId ExpenseDataId
-  labelId LabelDataId
+  expenseId ExpenseDataId OnDeleteCascade
+  labelId LabelDataId OnDeleteCascade
   deriving Show
 |]
 
@@ -72,7 +72,7 @@ type SQLitable m env = (MixDB.HasSqliteConfig env, HasLogFunc env, MonadReader e
 
 selectLabelAll :: SQLitable m env => m (Map LabelId Label)
 selectLabelAll = MixDB.run $ do
-  labels <- select $ from $ Table @LabelData
+  labels <- select $ from $ table @LabelData
   pure $ Map.fromList (liftA2 (,) (fromSqlKey . entityKey) (toLabel . entityVal) <$> labels)
 
 findLabelById :: SQLitable m env => LabelId -> m (Maybe Label)
@@ -92,7 +92,7 @@ findExpenseById idx = MixDB.run $ do
   expense <- get $ toSqlKey idx
   for expense $ \e -> do
     lids <- select $ do
-      el <- from $ Table @ExpenseLabelRel
+      el <- from $ table @ExpenseLabelRel
       where_ ((el DB.^. ExpenseLabelRelExpenseId) ==. val (toSqlKey idx))
       pure (el DB.^. ExpenseLabelRelLabelId)
     pure $ toEpense e (Set.fromList $ fromSqlKey . unValue <$> lids)
@@ -113,18 +113,18 @@ insertExpense expense = MixDB.run $ do
 
 deleteExpenseById :: SQLitable m env => ExpenseId  -> m ()
 deleteExpenseById idx =
-  MixDB.run $ deleteCascade (toSqlKey idx :: Key ExpenseData)
+  MixDB.run $ deleteKey (toSqlKey idx :: Key ExpenseData)
 
 selectExpensesByMonth :: SQLitable m env => (Integer, Int) -> m (Map ExpenseId Expense)
 selectExpensesByMonth (y, m) =
   MixDB.run $ do
     es <- select $ do
-      e <- from $ Table @ExpenseData
+      e <- from $ table @ExpenseData
       where_ (between (e DB.^. ExpenseDataDate) (val startDate, val endDate))
       pure e
     let eIds = fmap entityKey es
     els <- select $ do
-      el <- from $ Table @ExpenseLabelRel
+      el <- from $ table @ExpenseLabelRel
       where_ ((el DB.^. ExpenseLabelRelExpenseId) `in_` valList eIds) -- ToDo: eIds size is max 1000
       pure el
     pure $ Map.fromList (fromExpenseDataWith (toLabelIdsMap $ fmap entityVal els) <$> es)

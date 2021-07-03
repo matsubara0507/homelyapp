@@ -32,7 +32,6 @@ haskell_library(
         "@stackage//:mix-plugin-persistent-sqlite",
         "@stackage//:persistent",
         "@stackage//:persistent-sqlite",
-        "@stackage//:persistent-template",
         "@stackage//:rio",
         "@stackage//:servant-blaze",
         "@stackage//:servant-elmap",
