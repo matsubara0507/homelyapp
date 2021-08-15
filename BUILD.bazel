@@ -42,7 +42,7 @@ haskell_library(
         "@stackage//:yaml",
     ],
     extra_srcs = [":mainjs"],
-    compiler_flags = ['-DMAINJS_FILE="$(execpath :mainjs)"'] + GHC_FLAGS,
+    compiler_flags = ["-DMAINJS_FILE=\"$(execpath :mainjs)\""] + GHC_FLAGS,
 )
 
 paths_module(
