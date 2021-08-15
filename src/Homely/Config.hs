@@ -7,7 +7,6 @@ import qualified Data.Yaml       as Y
 
 type Config = Record
   '[ "sqlite_path" >: FilePath
-   , "static_path" >: FilePath
    ]
 
 readConfig :: MonadIO m => FilePath -> m Config

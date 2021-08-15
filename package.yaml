@@ -1,7 +1,5 @@
 name:                homelyapp
 version:             0.1.0
-#synopsis:
-#description:
 homepage:            https://github.com/matsubara0507/homelyapp#readme
 license:             MIT
 author:              MATSUBARA Nobutada
@@ -49,6 +47,7 @@ dependencies:
 - esqueleto
 - extensible >= 0.6
 - extensible-elmap
+- file-embed
 - mix
 - mix-json-logger
 - mix-plugin-persistent-sqlite
@@ -63,6 +62,8 @@ dependencies:
 
 library:
   source-dirs: src
+  cpp-options:
+  - -DMAINJS_FILE="static/main.js"
 
 executables:
   homelyapp:

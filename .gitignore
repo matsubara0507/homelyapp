@@ -9,3 +9,5 @@ bazel-out
 bazel-testlogs
 
 elm-stuff
+
+static/*

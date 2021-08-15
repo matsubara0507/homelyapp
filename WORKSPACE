@@ -31,6 +31,7 @@ load(
 )
 
 stack_snapshot(
+    local_snapshot = "//:stack-snapshot.yaml",
     name = "stackage",
     packages = [
         "base",
@@ -40,12 +41,12 @@ stack_snapshot(
         "esqueleto",
         "extensible",
         "extensible-elmap",
+        "file-embed",
         "mix",
         "mix-json-logger",
         "mix-plugin-persistent-sqlite",
         "persistent",
         "persistent-sqlite",
-        "persistent-template",
         "rio",
         "servant-blaze",
         "servant-elmap",
@@ -56,7 +57,6 @@ stack_snapshot(
         "warp",
         "yaml",
     ],
-    local_snapshot = "//:stack-snapshot.yaml",
 )
 
 load(
@@ -65,3 +65,29 @@ load(
 )
 
 rules_haskell_toolchains(version = "8.10.4")
+
+load(
+    "@bazel_tools//tools/build_defs/repo:git.bzl",
+    "git_repository",
+)
+
+git_repository(
+    name = "rules_elm",
+    remote = "https://github.com/matsubara0507/rules_elm",
+    commit = "83f046f28bc5de4c776f980f149cc0bc5577a49c",
+    shallow_since = "1628248957 +0900",
+)
+
+load(
+    "@rules_elm//elm:repositories.bzl",
+    rules_elm_repositories = "repositories",
+)
+
+rules_elm_repositories()
+
+load(
+    "@rules_elm//elm:toolchain.bzl",
+    rules_elm_toolchains = "toolchains",
+)
+
+rules_elm_toolchains(version = "0.19.1")
