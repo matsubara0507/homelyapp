@@ -49,9 +49,8 @@ runCmd :: Options -> FilePath -> IO ()
 runCmd opts path = do
   config <- Homely.readConfig path
   let plugin = hsequence
-        $ #logger      <@=> MixLogger.buildPlugin logOpts
-       <: #sqlite      <@=> MixDB.buildPlugin (fromString $ config ^. #sqlite_path) 2
-       <: #static_path <@=> pure (config ^. #static_path)
+        $ #logger <@=> MixLogger.buildPlugin logOpts
+       <: #sqlite <@=> MixDB.buildPlugin (fromString $ config ^. #sqlite_path) 2
        <: nil
   if opts ^. #migrate then
     Mix.run plugin Homely.migrate
