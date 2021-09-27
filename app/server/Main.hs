@@ -2,6 +2,7 @@ module Main where
 
 import           Paths_homelyapp           (version)
 import           RIO
+import           RIO.FilePath              (isRelative, takeDirectory, (</>))
 
 import           Configuration.Dotenv      (defaultConfig, loadFile)
 import           Data.Extensible
@@ -48,10 +49,14 @@ migrateOpt = optFlag [] ["migrate"] "Migrate SQLite"
 runCmd :: Options -> FilePath -> IO ()
 runCmd opts path = do
   config <- Homely.readConfig path
-  let plugin = hsequence
-        $ #logger      <@=> MixLogger.buildPlugin logOpts
-       <: #sqlite      <@=> MixDB.buildPlugin (fromString $ config ^. #sqlite_path) 2
-       <: #static_path <@=> pure (config ^. #static_path)
+  let sqlitePath =
+        if isRelative (config ^. #sqlite_path) then
+          takeDirectory path </> config ^. #sqlite_path
+        else
+          config ^. #sqlite_path
+      plugin = hsequence
+        $ #logger <@=> MixLogger.buildPlugin logOpts
+       <: #sqlite <@=> MixDB.buildPlugin (fromString sqlitePath) 2
        <: nil
   if opts ^. #migrate then
     Mix.run plugin Homely.migrate

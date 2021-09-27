@@ -1,8 +1,13 @@
+{-# LANGUAGE CPP             #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Homely.API where
 
 import           RIO
+import           RIO.FilePath                (takeDirectory)
 
 import           Data.Extensible
+import           Data.FileEmbed              (embedDir)
 import qualified Homely.DB                   as DB
 import           Homely.Data.Expense         (Expense, Label)
 import           Homely.Env                  (Env)
@@ -30,10 +35,9 @@ type CRUD
 api :: Proxy API
 api = Proxy
 
-server :: FilePath -> ServerT API (RIO Env)
-server staticPath
-       = indexHtml
-    :<|> serveDirectoryFileServer staticPath
+server :: ServerT API (RIO Env)
+server = indexHtml
+    :<|> serveDirectoryEmbedded $(embedDir (takeDirectory MAINJS_FILE))
     :<|> getExpenses
     :<|> createExpense
     :<|> deleteExpense
@@ -80,8 +84,8 @@ indexHtml = do
       H.div ! H.class_ "Box-header" $
         H.h1 ! H.class_ "Box-title" $ H.text "Homely App"
       H.div ! H.class_ "Box-Body" ! H.id "main" $ H.text ""
-    forM_ ["static/main.js", "static/index.js"] $ \url ->
-      H.script ! H.src url $ H.text ""
+    H.script ! H.type_ "text/javascript" ! H.src "/static/main.js" $ H.text ""
+    H.script ! H.type_ "text/javascript" $ H.text "Elm.Main.init({node: document.getElementById('main'), flags: {}});"
   where
     bulma = "https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css"
     fontawesome = "https://use.fontawesome.com/releases/v5.15.3/css/all.css"

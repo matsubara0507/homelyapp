@@ -1,15 +1,22 @@
 # homelyapp
 
-## Requirement
+HomelyApp is Web applicatoin of household expenses.
 
-## Usage
+(This project is my sandbox for Haskell with Bazel)
+
+## Example
+
+```
+$ bazelisk run //:homelyapp -- $(pwd)/example/.homely.yaml
+```
 
 ## Build
 
-### Docker
+```
+$ bazelisk run //:generateElm -- $(pwd)
+$ bazelisk build //:homelyapp
+```
 
-```
-$ stack --docker build -j 1 Cabal # if out of memory in docker
-$ stack --docker --local-bin-path=./bin install
-$ docker build -t matsubara0507/homelyapp . --build-arg local_bin_path=./bin
-```
+## Development
+
+Generate bazel config by [hazell](https://github.com/matsubara0507/hazell).

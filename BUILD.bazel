@@ -27,6 +27,7 @@ haskell_library(
         "@stackage//:esqueleto",
         "@stackage//:extensible",
         "@stackage//:extensible-elmap",
+        "@stackage//:file-embed",
         "@stackage//:mix",
         "@stackage//:mix-json-logger",
         "@stackage//:mix-plugin-persistent-sqlite",
@@ -40,7 +41,8 @@ haskell_library(
         "@stackage//:warp",
         "@stackage//:yaml",
     ],
-    compiler_flags = GHC_FLAGS,
+    extra_srcs = [":mainjs"],
+    compiler_flags = ["-DMAINJS_FILE=\"$(execpath :mainjs)\""] + GHC_FLAGS,
 )
 
 paths_module(
@@ -80,7 +82,6 @@ haskell_binary(
     compiler_flags = GHC_FLAGS,
 )
 
-
 haskell_test(
     name = "spec",
     srcs = glob(["test/**/*.hs"]),
@@ -95,4 +96,25 @@ haskell_test(
         "@stackage//:tasty-hspec",
     ],
     compiler_flags = GHC_FLAGS,
+)
+
+load(
+    "@rules_elm//elm:def.bzl",
+    "elm_dependencies",
+    "elm_make",
+)
+
+elm_dependencies(
+    name = "deps",
+    elm_json = "elm.json",
+)
+
+elm_make(
+    name = "mainjs",
+    srcs = glob(["elm-src/**"]) + glob(["elm-test/**"]),
+    elm_home = ":deps",
+    elm_json = "elm.json",
+    main = "elm-src/Main.elm",
+    output = "static/main.js",
+    visibility = ["//visibility:public"],
 )
