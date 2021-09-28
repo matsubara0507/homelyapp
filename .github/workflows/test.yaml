@@ -32,11 +32,4 @@ jobs:
         bazel-bin/homelyapp --help
 
     - name: Run test
-      run: bazelisk test //...
-
-    - uses: jorelali/setup-elm@v3
-      with:
-        elm-version: 0.19.1
-
-    - name: Run Elm test
-      run: npx elm-test elm-test
+      run: bazelisk test --test_output=all //...
