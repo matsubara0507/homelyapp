@@ -74,8 +74,8 @@ load(
 git_repository(
     name = "rules_elm",
     remote = "https://github.com/matsubara0507/rules_elm",
-    commit = "83f046f28bc5de4c776f980f149cc0bc5577a49c",
-    shallow_since = "1628248957 +0900",
+    commit = "80f94ad06b5e3d2703f5a61059ebe046fbe3e7a2",
+    shallow_since = "1632810783 +0900",
 )
 
 load(

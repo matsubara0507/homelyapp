@@ -102,6 +102,7 @@ load(
     "@rules_elm//elm:def.bzl",
     "elm_dependencies",
     "elm_make",
+    "elm_test",
 )
 
 elm_dependencies(
@@ -117,4 +118,12 @@ elm_make(
     main = "elm-src/Main.elm",
     output = "static/main.js",
     visibility = ["//visibility:public"],
+)
+
+elm_test(
+    name = "test-elm",
+    tests = glob(["elm-test/**"]),
+    srcs = glob(["elm-src/**"]),
+    elm_json = "elm.json",
+    elm_home = ":deps",
 )
